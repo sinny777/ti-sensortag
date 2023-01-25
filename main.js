@@ -1,15 +1,32 @@
 
 var SensorTag = require('./index');					// sensortag library
-var tags = new Array;						        // list of tags connected
+var tags = new Array;
+var EXIT_GRACE_PERIOD = 2000; // milliseconds
+var inRange = [];						        // list of tags connected
 
 // ------------------------ sensorTag functions
 function deviceConnected(device) {
 	console.log('New SensorTag Device connected');
+	SensorTag.stopDiscoverAll(deviceConnected);
 	var deviceRecord = {};		// make an object to hold sensor values
 	tags.push(deviceRecord);	// add it to the tags array
 
+	// var id = device.id;
+  	// var entered = !inRange[id];
+
+	// if (entered) {
+	// 	inRange[id] = {
+	// 		peripheral: device
+	// 	};
+
+	// 	// console.log('"' + device.advertisement.localName + '" entered (RSSI ' + device.rssi + ') ' + new Date());
+	// }
+
+	// inRange[id].lastSeen = Date.now();	
+	
 	function disconnect() {
 		console.log('tag disconnected!');
+		process.exit(0);
 	}
 
     function readBasicDetails(){
@@ -30,31 +47,31 @@ function deviceConnected(device) {
 		console.log('Enabling sensors');
         readBasicDetails();
 		// // enable sensor:
-		device.enableAccelerometer();
-		device.enableBarometricPressure();
-		// device.enableGyroscope();
-        device.enableMagnetometer();
-		device.enableHumidity();
-		device.enableIrTemperature();		
-        device.enableLuxometer();
-		// device.enableBatterLevel();
+		// device.enableAccelerometer();
+		// device.enableBarometricPressure();
+		// // device.enableGyroscope();
+        // device.enableMagnetometer();
+		// device.enableHumidity();
+		// device.enableIrTemperature();		
+        // device.enableLuxometer();
+		// // device.enableBatterLevel();
 
-		// make an object to hold each sensor's values:
-		deviceRecord.accel = {sensor: 'accelerometer'};
-		deviceRecord.barometer = {sensor: 'barometric pressure'};
-        deviceRecord.magneto = {sensor: 'magnetometer'};
-		// deviceRecord.gyro = {sensor: 'gyroscope'};
-        deviceRecord.keys = {sensor: 'simple keys'};
-		deviceRecord.rhSensor = {sensor: 'humidity'};
-		deviceRecord.irTemp = {sensor: 'IR temperature'};
+		// // make an object to hold each sensor's values:
+		// deviceRecord.accel = {sensor: 'accelerometer'};
+		// deviceRecord.barometer = {sensor: 'barometric pressure'};
+        // deviceRecord.magneto = {sensor: 'magnetometer'};
+		// // deviceRecord.gyro = {sensor: 'gyroscope'};
+        // deviceRecord.keys = {sensor: 'simple keys'};
+		// deviceRecord.rhSensor = {sensor: 'humidity'};
+		// deviceRecord.irTemp = {sensor: 'IR temperature'};
 		
-        deviceRecord.lux = {sensor: 'luxometer'};
+        // deviceRecord.lux = {sensor: 'luxometer'};
 
-		// then turn on notifications:
-		device.notifySimpleKey();
+		// // then turn on notifications:
+		// device.notifySimpleKey();
 
-		// set a 5-second read sensors interval:
-		setInterval(readSensors, 5000);
+		// // set a 5-second read sensors interval:
+		// setInterval(readSensors, 5000);
 	}
 
 	// read all the sensors except the keys:
@@ -137,6 +154,18 @@ function deviceConnected(device) {
 	// set a listener for the tag disconnects:
 	device.on('disconnect', disconnect);
 }
+
+// setInterval(function() {
+// 	for (var id in inRange) {
+// 	  if (inRange[id].lastSeen < (Date.now() - EXIT_GRACE_PERIOD)) {
+// 		var peripheral = inRange[id].peripheral;
+  
+// 		// console.log('"' + peripheral.advertisement.localName + '" exited (RSSI ' + peripheral.rssi + ') ' + new Date());
+  
+// 		delete inRange[id];
+// 	  }
+// 	}
+//   }, EXIT_GRACE_PERIOD / 2);
 
 // listen for tags and handle them when you discover one:
 SensorTag.discoverAll(deviceConnected);
